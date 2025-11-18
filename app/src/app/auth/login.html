@@ -1,0 +1,22 @@
+<div class="login-container">
+
+  <!-- Si hay usuario, mostrar info -->
+  <ng-container *ngIf="user$ | async as u; else loginBtn">
+
+    <img [src]="u.photoURL || ''" class="avatar" alt="Foto" />
+
+    <h3>{{ u.displayName }}</h3>
+    <p>{{ u.email }}</p>
+    <small>Rol: {{ u.role }}</small>
+
+    <button (click)="logout()" class="btn logout">Cerrar sesión</button>
+  </ng-container>
+
+  <!-- Si NO hay usuario -->
+  <ng-template #loginBtn>
+    <button (click)="login()" class="btn login">
+      Iniciar sesión con Google
+    </button>
+  </ng-template>
+
+</div>
