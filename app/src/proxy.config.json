@@ -1,0 +1,8 @@
+{
+  "/simpsons": {
+    "target": "https://thesimpsonsapi.com/api",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

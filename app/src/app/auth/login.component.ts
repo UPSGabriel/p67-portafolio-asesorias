@@ -8,19 +8,18 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './login.html',
-  styleUrl: './login.scss',
+  styleUrls: ['./login.scss'],
 })
 export class LoginComponent {
-
   private auth = inject(AuthService);
 
   user$: Observable<AppUser | null> = this.auth.user$;
 
-  login() {
+  login(): void {
     this.auth.loginWithGoogle();
   }
 
-  logout() {
+  logout(): void {
     this.auth.logout();
   }
 }
