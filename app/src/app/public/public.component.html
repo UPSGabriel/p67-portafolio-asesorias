@@ -1,0 +1,42 @@
+<header class="header">
+  <h1>Portafolio Público</h1>
+  <p>Bienvenido a mi página pública del proyecto integrador.</p>
+</header>
+
+<section class="seccion">
+  <h2>Portafolio</h2>
+
+  <div class="grid">
+    <div class="card" *ngFor="let p of proyectos">
+      <img [src]="p.imagen" alt="Imagen proyecto">
+      <h3>{{ p.titulo }}</h3>
+      <p>{{ p.descripcion }}</p>
+      <button>Ver más</button>
+    </div>
+  </div>
+</section>
+
+<section class="seccion">
+  <h2>Habilidades</h2>
+
+  <div class="chips">
+    <span *ngFor="let skill of habilidades" class="chip">
+      {{ skill }}
+    </span>
+  </div>
+</section>
+
+<section class="seccion">
+  <h2>Contacto</h2>
+  
+  <form>
+    <label>Nombre</label>
+    <input type="text" placeholder="Tu nombre">
+
+    <label>Mensaje</label>
+    <textarea placeholder="Escribe tu mensaje"></textarea>
+
+    <button type="button">Enviar</button>
+  </form>
+</section>
+
