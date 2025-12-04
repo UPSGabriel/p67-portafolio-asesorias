@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 
 
 export type AppRole = 'admin' | 'programmer' | 'user';
-
 export interface AppUser {
   uid: string;
   displayName: string | null;
@@ -15,6 +14,13 @@ export interface AppUser {
   photoURL: string | null;
   role: AppRole;
   createdAt?: number;
+  // --- Nuevos campos para Programadores (según PDF) ---
+  specialty?: string;      // Ej: Desarrollo Web, Móvil, IA
+  description?: string;    // Breve descripción
+  contactEmail?: string;   // Correo de contacto (puede ser diferente al de login)
+  whatsapp?: string;       // Número
+  linkedin?: string;       // URL perfil
+  github?: string;         // URL portafolio/repositorio
 }
 
 @Injectable({ providedIn: 'root' })
@@ -23,7 +29,7 @@ export class AuthService {
   private db = inject(Firestore);
   private router = inject(Router);
 
-  
+
   readonly user$: Observable<AppUser | null> = user(this.auth).pipe(
     switchMap(u => {
       if (!u) return [null];
@@ -32,7 +38,7 @@ export class AuthService {
     })
   );
 
-  
+
   private getHomeForRole(role: AppRole): string {
     switch (role) {
       case 'admin': return '/admin';
@@ -46,7 +52,7 @@ export class AuthService {
       const provider = new GoogleAuthProvider();
       const cred = await signInWithPopup(this.auth, provider);
       const u = cred.user;
-      
+
       if (!u) return;
 
       const ref = doc(this.db, 'users', u.uid);
@@ -67,7 +73,7 @@ export class AuthService {
 
       const finalDoc = await getDoc(ref);
       const userData = finalDoc.data() as AppUser;
-      
+
 
       const targetRoute = this.getHomeForRole(userData.role);
       this.router.navigateByUrl(targetRoute);

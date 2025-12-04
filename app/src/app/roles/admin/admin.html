@@ -1,39 +1,97 @@
 <div class="admin-container">
   <header>
     <h1>Panel de Administrador</h1>
-    <button (click)="auth.logout()">Cerrar Sesión</button>
+    <button (click)="auth.logout()" class="logout-btn">Cerrar Sesión</button>
   </header>
 
   <div class="users-list">
-    <h3>Gestión de Usuarios</h3>
+    <div class="list-header">
+      <h3>Gestión de Usuarios</h3>
+      <button class="btn-create" (click)="openCreateModal()">
+        + Registrar Programador
+      </button>
+    </div>
+
     <table>
       <thead>
-        <tr>
-          <th>Usuario</th>
-          <th>Email</th>
-          <th>Rol Actual</th>
-          <th>Cambiar Rol</th>
-        </tr>
+      <tr>
+        <th>Usuario</th>
+        <th>Email</th>
+        <th>Rol Actual</th>
+        <th>Acciones</th>
+      </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let u of users$ | async">
-          <td>
-            <div style="display:flex; align-items:center; gap:10px;">
-              <img [src]="u.photoURL" width="30" style="border-radius:50%">
-              {{ u.displayName }}
-            </div>
-          </td>
-          <td>{{ u.email }}</td>
-          <td><strong>{{ u.role }}</strong></td>
-          <td>
-            <select [value]="u.role" (change)="updateRole(u.uid, $event)">
-              <option value="user">User (Público)</option>
-              <option value="programmer">Programmer</option>
-              <option value="admin">Admin</option>
-            </select>
-          </td>
-        </tr>
+      <tr *ngFor="let u of users$ | async">
+        <td>
+          <div class="user-info">
+            <img [src]="u.photoURL || 'https://ui-avatars.com/api/?name='+u.displayName" class="avatar">
+            <span>{{ u.displayName }}</span>
+          </div>
+        </td>
+        <td>{{ u.email }}</td>
+        <td>
+          <select [value]="u.role" (change)="updateRole(u.uid, $event)">
+            <option value="user">User (Público)</option>
+            <option value="programmer">Programmer</option>
+            <option value="admin">Admin</option>
+          </select>
+        </td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn-icon btn-edit" (click)="editUser(u)" title="Editar">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+            </button>
+            <button class="btn-icon btn-delete" (click)="deleteUser(u)" title="Eliminar">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="modal-overlay" *ngIf="isModalOpen && selectedUser">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{ isNewUser ? 'Registrar Nuevo Programador' : 'Editar Usuario' }}</h3>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+
+        <label>Nombre Completo:</label>
+        <input [(ngModel)]="selectedUser.displayName" placeholder="Ej: Daniel Pacheco">
+
+        <label>Correo Electrónico:</label>
+        <input [(ngModel)]="selectedUser.email" placeholder="Ej: daniel@mail.com">
+
+        <label>URL Foto (Opcional):</label>
+        <input [(ngModel)]="selectedUser.photoURL" placeholder="https://...">
+
+        <div class="section-title">Perfil Profesional</div>
+
+        <label>Especialidad:</label>
+        <input [(ngModel)]="selectedUser.specialty" placeholder="Ej: Full Stack Developer">
+
+        <label>Descripción:</label>
+        <textarea [(ngModel)]="selectedUser.description" placeholder="Resumen profesional..."></textarea>
+
+        <label>WhatsApp:</label>
+        <input [(ngModel)]="selectedUser.whatsapp" placeholder="+593 99...">
+
+        <label>GitHub:</label>
+        <input [(ngModel)]="selectedUser.github" placeholder="URL GitHub">
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="cancel" (click)="closeModal()">Cancelar</button>
+        <button class="confirm" (click)="saveUserChanges()">
+          {{ isNewUser ? 'Registrar Usuario' : 'Guardar Cambios' }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>

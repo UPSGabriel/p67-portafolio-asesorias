@@ -1,108 +1,242 @@
-.programmer-layout {
+/* Layout General */
+.layout-container {
   display: flex;
   min-height: 100vh;
-  background: #f0f2f5;
+  background-color: #f3f4f6;
+  font-family: 'Segoe UI', sans-serif;
 }
 
+/* Sidebar */
 .sidebar {
-  width: 250px;
+  width: 260px;
   background: white;
-  padding: 20px;
-  border-right: 1px solid #ddd;
-  .profile { margin-bottom: 2rem; h3 { margin: 0; } p { color: #888; } }
-  nav button {
-    display: block; width: 100%; text-align: left; padding: 12px;
-    background: none; border: none; cursor: pointer; color: #555;
-    border-radius: 8px; margin-bottom: 5px;
-    &.active { background: #e6f7ff; color: #1890ff; font-weight: bold; }
-    &.logout { color: #ff4d4f; margin-top: 20px; }
-    &:hover:not(.active) { background: #f5f5f5; }
-  }
-}
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e5e7eb;
 
-.content {
-  flex: 1;
-  padding: 30px;
-  .add-project-card {
-    background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    .form-grid {
-      display: grid; gap: 10px;
-      input, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box;}
-      button { background: #1890ff; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; justify-self: start;}
+  .profile-summary {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    .avatar { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 1rem; object-fit: cover;}
+    h3 { margin: 0; color: #1f2937; font-size: 1.1rem; }
+    .badge { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; margin-top: 5px; display: inline-block;}
+  }
+
+  .menu {
+    display: flex; flex-direction: column; gap: 10px; flex: 1;
+
+    button {
+      text-align: left; padding: 12px; border-radius: 8px; border: none; background: none;
+      color: #4b5563; font-weight: 500; cursor: pointer; transition: all 0.2s;
+
+      &:hover { background: #f9fafb; color: #111; }
+      &.active { background: #eef2ff; color: #4f46e5; }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
     }
   }
-  
-  .project-item {
-    background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;
-    display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #1890ff;
-    h4 { margin: 0 0 5px 0; } p { margin: 0 0 5px 0; color: #666; } .tech { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
-    .link-btn { text-decoration: none; color: #1890ff; font-weight: bold; }
+
+  .logout-link {
+    background: none; border: none; color: #ef4444; cursor: pointer; font-weight: 500;
+    &:hover { text-decoration: underline; }
   }
 }
 
-.actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
+/* Contenido Principal */
+.main-content {
+  flex: 1;
+  padding: 2rem 3rem;
+  overflow-y: auto;
 
-.delete-btn {
-  background: transparent;
-  border: 1px solid #ff4d4f;
-  color: #ff4d4f;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  &:hover {
-    background: #ff4d4f;
-    color: white;
+  header {
+    margin-bottom: 2rem;
+    h1 { margin: 0; color: #111827; }
+    p { color: #6b7280; margin-top: 5px; }
   }
 }
 
+/* Tarjeta del Formulario */
+.card {
+  background: white; padding: 2rem; border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+
+  h3 { margin-top: 0; margin-bottom: 1.5rem; color: #374151; }
+}
+
+.form-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+
+  .full-width { grid-column: span 2; }
+
+  label { display: block; font-size: 0.85rem; font-weight: 600; color: #4b5563; margin-bottom: 0.5rem; }
+
+  input, select, textarea {
+    width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;
+    font-family: inherit; box-sizing: border-box;
+    &:focus { outline: none; border-color: #6366f1; ring: 2px solid #6366f1; }
+  }
+  textarea { min-height: 80px; resize: vertical; }
+}
+
+.card-actions {
+  margin-top: 1.5rem; text-align: right;
+  .btn-primary {
+    background: #4f46e5; color: white; border: none; padding: 10px 24px;
+    border-radius: 6px; font-weight: 600; cursor: pointer;
+    &:hover { background: #4338ca; }
+  }
+}
+
+/* Lista de Proyectos */
+.projects-list {
+  h3 { color: #374151; margin-bottom: 1rem; }
+}
+
+.project-card {
+  background: white; padding: 1.5rem; border-radius: 8px;
+  margin-bottom: 1rem; border-left: 4px solid #4f46e5;
+  display: flex; justify-content: space-between; align-items: start;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  .project-info {
+    h4 { margin: 0 0 5px; font-size: 1.1rem; }
+
+    .tag {
+      font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle;
+      &.academico { background: #dbeafe; color: #1e40af; }
+      &.laboral { background: #d1fae5; color: #065f46; }
+    }
+
+    .desc { color: #4b5563; font-size: 0.95rem; margin: 5px 0 10px; }
+
+    .techs { color: #6b7280; font-size: 0.85rem; margin-bottom: 10px; }
+
+    .links a {
+      color: #4f46e5; text-decoration: none; font-size: 0.9rem; margin-right: 15px; font-weight: 500;
+      &:hover { text-decoration: underline; }
+    }
+  }
+
+  .btn-delete {
+    background: #fee2e2; color: #ef4444; border: none; width: 30px; height: 30px;
+    border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+    &:hover { background: #fecaca; }
+  }
+}
+
+/* Animación suave al cambiar de pestaña */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- ESTILOS DE ASESORÍAS --- */
 .appointments-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
 }
 
-.card-apt {
+.appt-card {
   background: white;
-  padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border-left: 5px solid #ccc;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid #f3f4f6;
+  display: flex;
+  flex-direction: column;
+}
 
-  &.pending { border-left-color: #f1c40f; } 
-  &.approved { border-left-color: #2ecc71; } 
-  &.rejected { border-left-color: #e74c3c; } 
+.appt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 
-  .apt-header {
-    display: flex; justify-content: space-between; margin-bottom: 10px;
-    font-size: 0.8rem; color: #888;
+  .date-badge {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
   }
-  
-  h4 { margin: 0; color: #333; }
-  .contact { font-size: 0.9rem; color: #1890ff; margin: 2px 0 10px; }
-  .topic { font-style: italic; color: #555; background: #f9f9f9; padding: 10px; border-radius: 6px;}
 
-  .actions {
-    display: flex; gap: 10px; margin-top: 15px;
+  .status-badge {
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 20px;
+
+    &.pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+    &.approved { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    &.rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+  }
+}
+
+.appt-body {
+  h3 { margin: 0; font-size: 1.1rem; color: #1f2937; }
+  .contact { color: #6b7280; margin: 2px 0 15px; font-size: 0.9rem; }
+
+  .topic-box {
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #374151;
+    p { margin: 5px 0 0; }
+  }
+}
+
+.appt-actions {
+  margin-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+
+  textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 0.9rem;
+    min-height: 60px;
+    margin-bottom: 10px;
+    box-sizing: border-box; /* Fix desborde */
+  }
+
+  .buttons {
+    display: flex;
+    gap: 10px;
+
     button {
-      flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold;
-      &.approve { background: #2ecc71; }
-      &.reject { background: #e74c3c; }
-      &:hover { opacity: 0.9; }
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
     }
+
+    .btn-reject { background: #fff1f2; color: #e11d48; &:hover { background: #ffe4e6; }}
+    .btn-accept { background: #4f46e5; color: white; &:hover { background: #4338ca; }}
   }
 }
 
-.test-btn {
-  background: #333; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;
-  font-size: 0.8rem;
-}
+.appt-reply {
+  margin-top: 1rem;
+  padding: 10px;
+  background: #f0fdf4; /* Verde muy suave */
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #166534;
 
-.count {
-  background: #ff4d4f; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; margin-left: 5px;
+  strong { display: block; margin-bottom: 4px; }
+  p { margin: 0; }
 }

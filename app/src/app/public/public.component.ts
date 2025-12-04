@@ -1,26 +1,27 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { PublicService } from '../services/public'; 
-import { AuthService } from '../auth/auth.service';
-import { AppUser } from '../auth/auth.service';
+import { FormsModule } from '@angular/forms'; // Importante para ngModel
+import { AuthService, AppUser } from '../auth/auth.service';
+import { Firestore, collection, collectionData, query, where, addDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-public',
   standalone: true,
-  imports: [CommonModule, FormsModule], 
+  imports: [CommonModule, FormsModule],
   templateUrl: './public.component.html',
   styleUrls: ['./public.component.scss']
 })
 export class PublicComponent {
-  publicService = inject(PublicService);
-  authService = inject(AuthService);
+  auth = inject(AuthService);
+  private db = inject(Firestore);
 
-  programmers$: Observable<AppUser[]> = this.publicService.getProgrammers();
+  // 1. Cargar solo usuarios con rol 'programmer'
+  programmers$: Observable<AppUser[]>;
 
-
+  // Variables para el Modal
   selectedProgrammer: AppUser | null = null;
+
   appointmentForm = {
     userName: '',
     userContact: '',
@@ -29,58 +30,62 @@ export class PublicComponent {
     time: ''
   };
 
-  scrollTo(section: string) {
-    document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
+  constructor() {
+    const usersRef = collection(this.db, 'users');
+    const q = query(usersRef, where('role', '==', 'programmer'));
+    this.programmers$ = collectionData(q) as Observable<AppUser[]>;
   }
 
-
-  openSchedule(programmer: AppUser) {
-    this.selectedProgrammer = programmer;
-  }
-
-
-  closeModal() {
-    this.selectedProgrammer = null;
-
+  // Abrir el modal al hacer click en "Agendar"
+  openSchedule(dev: AppUser) {
+    this.selectedProgrammer = dev;
+    // Limpiamos el formulario
     this.appointmentForm = { userName: '', userContact: '', topic: '', date: '', time: '' };
   }
 
- 
-  async submitAppointment() {
-    if (!this.selectedProgrammer) return;
-    
+  // Cerrar el modal
+  closeModal() {
+    this.selectedProgrammer = null;
+  }
 
-    if (!this.appointmentForm.userName || !this.appointmentForm.topic) {
-      alert('Por favor completa los campos obligatorios');
+  // --- ESTA ES LA FUNCIÓN CLAVE QUE FALTABA ---
+  async submitAppointment() {
+    if (!this.appointmentForm.userName || !this.appointmentForm.date || !this.selectedProgrammer) {
+      alert('Por favor completa los datos obligatorios.');
       return;
     }
 
     try {
+      // 1. Referencia a la colección de citas
+      const appointmentsRef = collection(this.db, 'appointments');
 
-      const fullDate = new Date(this.appointmentForm.date + 'T' + this.appointmentForm.time);
-
-      const request = {
-        programmerUid: this.selectedProgrammer.uid,
-        programmerName: this.selectedProgrammer.displayName,
+      // 2. Guardamos el documento con los campos EXACTOS que espera el panel del programador
+      await addDoc(appointmentsRef, {
+        programmerId: this.selectedProgrammer.uid, // ¡Muy importante! Para que le llegue a ÉL
         userName: this.appointmentForm.userName,
         userContact: this.appointmentForm.userContact,
         topic: this.appointmentForm.topic,
-        status: 'pending', 
-        date: fullDate,
-        createdAt: new Date()
-      };
+        date: this.appointmentForm.date,
+        time: this.appointmentForm.time,
+        status: 'pending', // Estado inicial
+        createdAt: Date.now()
+      });
 
-      await this.publicService.requestAppointment(request);
-      
-      alert('✅ Solicitud enviada con éxito. El programador te contactará.');
+      alert('¡Solicitud enviada con éxito! El programador te contactará.');
       this.closeModal();
 
     } catch (error) {
-      console.error(error);
-      alert('❌ Error al enviar solicitud');
+      console.error('Error al agendar:', error);
+      alert('Hubo un error al enviar la solicitud.');
     }
   }
+
+  // Función para scroll suave (opcional, si la usas en el HTML)
+  scrollTo(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
+
   logout() {
-    this.authService.logout();
+    this.auth.logout();
   }
 }

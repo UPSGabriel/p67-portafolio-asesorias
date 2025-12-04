@@ -1,87 +1,114 @@
-<div class="programmer-layout">
+<div class="layout-container" *ngIf="currentUser$ | async as user">
+
   <aside class="sidebar">
-    <ng-container *ngIf="data$ | async as data">
-      <div class="profile">
-        <h3>{{ data.user.displayName }}</h3>
-        <p class="role-badge">Programador</p>
-      </div>
-      <nav>
-        <button [class.active]="currentView === 'projects'" 
-                (click)="setView('projects')">
-          📁 Mis Proyectos
-        </button>
-        
-        <button [class.active]="currentView === 'appointments'" 
-                (click)="setView('appointments')">
-          📅 Asesorías 
-          <span class="count" *ngIf="data.appointments.length">{{ data.appointments.length }}</span>
-        </button>
-        
-        <button (click)="auth.logout()" class="logout">Cerrar Sesión</button>
-      </nav>
-    </ng-container>
+    <div class="profile-summary">
+      <img [src]="user.photoURL || 'https://ui-avatars.com/api/?name='+user.displayName" class="avatar">
+      <h3>{{ user.displayName }}</h3>
+      <span class="badge">Programador</span>
+    </div>
+
+    <nav class="menu">
+      <button (click)="switchView('projects')"
+              [class.active]="currentView === 'projects'">
+        📂 Mis Proyectos
+      </button>
+
+      <button (click)="switchView('appointments')"
+              [class.active]="currentView === 'appointments'">
+        📅 Asesorías
+      </button>
+    </nav>
+
+    <div class="bottom-action">
+      <button (click)="auth.logout()" class="logout-link">Cerrar Sesión</button>
+    </div>
   </aside>
 
-  <main class="content">
-    <ng-container *ngIf="data$ | async as data; else loading">
-      
-      <div *ngIf="currentView === 'projects'" class="fade-in">
-        <header><h2>Gestión de Portafolio</h2></header>
-        
-        <div class="add-project-card">
-          <h3>Nuevo Proyecto</h3>
-          <div class="form-grid">
-            <input type="text" [(ngModel)]="newProject.title" placeholder="Título">
-            <input type="text" [(ngModel)]="newProject.tech" placeholder="Tecnologías">
-            <input type="text" [(ngModel)]="newProject.link" placeholder="Link Repo/Demo">
-            <textarea [(ngModel)]="newProject.description" placeholder="Descripción"></textarea>
-            <button (click)="addProject(data.user.uid)">+ Guardar</button> 
-          </div>
-        </div>
+  <main class="main-content">
 
-        <div class="projects-list">
-          <div class="project-item" *ngFor="let proj of data.projects">
-            <div>
-              <h4>{{ proj.title }}</h4>
-              <p>{{ proj.description }}</p>
-              <small class="tech">{{ proj.tech }}</small>
-            </div>
-            <button (click)="deleteProject(data.user.uid, proj.id!)" class="delete-btn">×</button>
-          </div>
+    <div *ngIf="currentView === 'projects'" class="fade-in">
+      <header>
+        <h1>Gestión de Portafolio</h1>
+        <p>Administra tus proyectos académicos y laborales.</p>
+      </header>
+
+      <div class="card form-card">
+        <h3>Nuevo Proyecto</h3>
+        <div class="form-grid">
+          <div class="full-width"><label>Nombre</label><input [(ngModel)]="newProject.name"></div>
+          <div><label>Sección</label><select [(ngModel)]="newProject.section"><option value="Academico">Académico</option><option value="Laboral">Laboral</option></select></div>
+          <div><label>Rol</label><input [(ngModel)]="newProject.participation"></div>
+          <div class="full-width"><label>Tecnologías</label><input [(ngModel)]="newProject.technologies"></div>
+          <div class="full-width"><label>Descripción</label><textarea [(ngModel)]="newProject.description"></textarea></div>
+          <div><label>Repo</label><input [(ngModel)]="newProject.repoUrl"></div>
+          <div><label>Demo</label><input [(ngModel)]="newProject.demoUrl"></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-primary" (click)="saveProject(user.uid)">+ Guardar</button>
         </div>
       </div>
 
-      <div *ngIf="currentView === 'appointments'" class="fade-in">
-        <header>
-          <h2>Solicitudes de Asesoría</h2>
-          <button class="test-btn" (click)="createDemo(data.user.uid)">+ Crear Solicitud de Prueba</button>
-        </header>
+      <div class="projects-list">
+        <div class="project-card" *ngFor="let p of projects$ | async">
+          <div class="project-info">
+            <h4>{{ p.name }} <span class="tag">{{ p.section }}</span></h4>
+            <p>{{ p.description }}</p>
+          </div>
+          <button class="btn-delete" (click)="deleteProject(p.id!)">&times;</button>
+        </div>
+      </div>
+    </div>
 
-        <div class="appointments-grid">
-          <div class="card-apt" *ngFor="let apt of data.appointments" [class]="apt.status">
-            <div class="apt-header">
-              <span class="status-badge">{{ apt.status | uppercase }}</span>
-              <span class="date">{{ apt.date.seconds * 1000 | date:'short' }}</span>
-            </div>
-            
-            <h4>{{ apt.userName }}</h4>
-            <p class="contact">{{ apt.userContact }}</p>
-            <p class="topic">"{{ apt.topic }}"</p>
 
-            <div class="actions" *ngIf="apt.status === 'pending'">
-              <button class="approve" (click)="respondAppointment(apt.id!, 'approved')">Aprobar</button>
-              <button class="reject" (click)="respondAppointment(apt.id!, 'rejected')">Rechazar</button>
-            </div>
-            <div class="actions" *ngIf="apt.status !== 'pending'">
-              <p>Solicitud gestionada.</p>
+    <div *ngIf="currentView === 'appointments'" class="fade-in">
+      <header>
+        <h1>Solicitudes de Asesoría</h1>
+        <p>Gestiona tus reuniones con clientes y estudiantes.</p>
+      </header>
+
+      <div class="appointments-grid">
+        <div class="appt-card" *ngFor="let appt of appointments$ | async">
+
+          <div class="appt-header">
+            <span class="date-badge">
+              📅 {{ appt.date }} | 🕒 {{ appt.time }}
+            </span>
+            <span class="status-badge" [ngClass]="appt.status">
+              {{ appt.status | uppercase }}
+            </span>
+          </div>
+
+          <div class="appt-body">
+            <h3>{{ appt.userName }}</h3>
+            <p class="contact">📧 {{ appt.userContact }}</p>
+            <div class="topic-box">
+              <strong>Motivo:</strong>
+              <p>{{ appt.topic }}</p>
             </div>
           </div>
 
-          <p *ngIf="data.appointments.length === 0">No tienes solicitudes pendientes.</p>
+          <div class="appt-actions" *ngIf="appt.status === 'pending'">
+            <textarea [(ngModel)]="appt.replyMessage"
+                      placeholder="Escribe un mensaje para aceptar o rechazar (Ej: Confirmado, te envío link de Meet...)"></textarea>
+
+            <div class="buttons">
+              <button class="btn-reject" (click)="respondAppointment(appt, 'rejected')">Rechazar</button>
+              <button class="btn-accept" (click)="respondAppointment(appt, 'approved')">Aprobar Cita</button>
+            </div>
+          </div>
+
+          <div class="appt-reply" *ngIf="appt.status !== 'pending'">
+            <strong>Tu respuesta:</strong>
+            <p>{{ appt.replyMessage }}</p>
+          </div>
+
+        </div>
+
+        <div *ngIf="(appointments$ | async)?.length === 0" class="empty-state">
+          <p>🎉 No tienes solicitudes de asesoría pendientes.</p>
         </div>
       </div>
+    </div>
 
-    </ng-container>
-    <ng-template #loading><p class="loading">Cargando panel...</p></ng-template>
   </main>
 </div>
