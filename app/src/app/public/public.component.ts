@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Importante para ngModel
+import { FormsModule } from '@angular/forms';
 import { AuthService, AppUser } from '../auth/auth.service';
-import { Firestore, collection, collectionData, query, where, addDoc } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Firestore, collection, collectionData, query, where, addDoc, orderBy } from '@angular/fire/firestore';
+// Importamos 'map' para calcular el número de notificaciones
+import { Observable, switchMap, of, map } from 'rxjs';
 
 @Component({
   selector: 'app-public',
@@ -16,10 +17,17 @@ export class PublicComponent {
   auth = inject(AuthService);
   private db = inject(Firestore);
 
-  // 1. Cargar solo usuarios con rol 'programmer'
+  // 1. Lista de Programadores
   programmers$: Observable<AppUser[]>;
 
-  // Variables para el Modal
+  // 2. Mis Solicitudes (Citas creadas por mí)
+  myAppointments$: Observable<any[]> = of([]);
+
+  // 3. Contador de Notificaciones (Respuestas recibidas)
+  unreadCount$: Observable<number>;
+
+  // Control de Modales
+  showMyAppointments = false;
   selectedProgrammer: AppUser | null = null;
 
   appointmentForm = {
@@ -31,37 +39,57 @@ export class PublicComponent {
   };
 
   constructor() {
+    // A. Cargar Programadores
     const usersRef = collection(this.db, 'users');
     const q = query(usersRef, where('role', '==', 'programmer'));
     this.programmers$ = collectionData(q) as Observable<AppUser[]>;
+
+    // B. Cargar Mis Citas (Solo si hay usuario logueado)
+    this.myAppointments$ = this.auth.user$.pipe(
+      switchMap(user => {
+        if (!user) return of([]);
+        const apptRef = collection(this.db, 'appointments');
+        // Traemos las citas donde YO soy el creador (creatorUid)
+        const qAppt = query(
+          apptRef,
+          where('creatorUid', '==', user.uid),
+          orderBy('createdAt', 'desc')
+        );
+        return collectionData(qAppt);
+      })
+    );
+
+    // C. Calcular Notificaciones
+    // Contamos las citas que NO están en 'pending' (o sea, ya me respondieron)
+    this.unreadCount$ = this.myAppointments$.pipe(
+      map(citas => citas.filter(c => c.status !== 'pending').length)
+    );
   }
 
-  // Abrir el modal al hacer click en "Agendar"
+  // --- MÉTODOS ---
+
   openSchedule(dev: AppUser) {
     this.selectedProgrammer = dev;
-    // Limpiamos el formulario
     this.appointmentForm = { userName: '', userContact: '', topic: '', date: '', time: '' };
   }
 
-  // Cerrar el modal
   closeModal() {
     this.selectedProgrammer = null;
   }
 
-  // --- ESTA ES LA FUNCIÓN CLAVE QUE FALTABA ---
-  async submitAppointment() {
+  async submitAppointment(userUid: string) {
     if (!this.appointmentForm.userName || !this.appointmentForm.date || !this.selectedProgrammer) {
-      alert('Por favor completa los datos obligatorios.');
+      alert('Por favor completa los campos obligatorios.');
       return;
     }
 
     try {
-      // 1. Referencia a la colección de citas
       const appointmentsRef = collection(this.db, 'appointments');
-
-      // 2. Guardamos el documento con los campos EXACTOS que espera el panel del programador
       await addDoc(appointmentsRef, {
-        programmerId: this.selectedProgrammer.uid, // ¡Muy importante! Para que le llegue a ÉL
+        programmerId: this.selectedProgrammer.uid, // Para que le salga al programador
+        programmerName: this.selectedProgrammer.displayName, // Para que yo sepa con quién es
+        creatorUid: userUid, // IMPORTANTE: Mi ID para ver la respuesta después
+
         userName: this.appointmentForm.userName,
         userContact: this.appointmentForm.userContact,
         topic: this.appointmentForm.topic,
@@ -71,16 +99,15 @@ export class PublicComponent {
         createdAt: Date.now()
       });
 
-      alert('¡Solicitud enviada con éxito! El programador te contactará.');
+      alert('¡Solicitud enviada! Te avisaremos cuando el mentor responda.');
       this.closeModal();
 
     } catch (error) {
       console.error('Error al agendar:', error);
-      alert('Hubo un error al enviar la solicitud.');
+      alert('Error al enviar solicitud.');
     }
   }
 
-  // Función para scroll suave (opcional, si la usas en el HTML)
   scrollTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   }

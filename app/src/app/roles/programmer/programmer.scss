@@ -240,3 +240,86 @@
   strong { display: block; margin-bottom: 4px; }
   p { margin: 0; }
 }
+
+/* --- RESPONSIVE PARA MÓVIL (Pega esto al final de programmer.scss) --- */
+@media (max-width: 768px) {
+  .layout-container {
+    flex-direction: column; /* Cambia de lado a lado -> a arriba y abajo */
+  }
+
+  .sidebar {
+    width: 100%; /* Ocupa todo el ancho */
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem;
+    box-sizing: border-box;
+
+    /* Ocultamos la foto grande en móvil para ahorrar espacio */
+    .profile-summary .avatar {
+      width: 50px;
+      height: 50px;
+    }
+
+    .menu {
+      flex-direction: row; /* Menú horizontal */
+      overflow-x: auto;
+      gap: 10px;
+      padding-bottom: 10px;
+
+      button {
+        white-space: nowrap; /* Que no se rompa el texto */
+        padding: 8px 15px;
+        border: 1px solid #eee;
+      }
+    }
+
+    .bottom-action {
+      display: none; /* Ocultamos cerrar sesión abajo, puedes ponerlo arriba si quieres */
+    }
+  }
+
+  .main-content {
+    padding: 1.5rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr; /* Una sola columna en formularios */
+
+    .full-width {
+      grid-column: span 1;
+    }
+  }
+}
+/* ... (Tus estilos anteriores de layout, sidebar, etc) ... */
+
+/* ESTILO DEL BADGE DE NOTIFICACIÓN */
+.menu button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notif-badge {
+  background-color: #ef4444; /* Rojo */
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* Etiquetas de Proyectos (Académico/Laboral) */
+.tag {
+  font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.5px;
+  &.academico { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+  &.laboral { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+}
+
+/* ... (El resto de tus estilos responsive, etc) ... */

@@ -2,23 +2,22 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
-import { Firestore, collection, addDoc, collectionData, query, where, deleteDoc, doc, updateDoc, orderBy } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+// IMPORTANTE: Agregamos 'map' aquí para que funcione el contador
+import { Observable, map } from 'rxjs';
+import { Firestore, collection, addDoc, collectionData, query, where, deleteDoc, doc, updateDoc } from '@angular/fire/firestore';
 
-// Interfaz para Proyectos
 export interface Project {
   id?: string;
   ownerUid: string;
   name: string;
   description: string;
-  section: 'Academico' | 'Laboral';
-  participation: string;
-  technologies: string;
-  repoUrl: string;
-  demoUrl: string;
+  section: 'Academico' | 'Laboral'; // Requisito PDF
+  participation: string;            // Requisito PDF
+  technologies: string;             // Requisito PDF
+  repoUrl: string;                  // Requisito PDF
+  demoUrl: string;                  // Requisito PDF
 }
 
-// Interfaz para Asesorías (NUEVO)
 export interface Appointment {
   id?: string;
   programmerId: string;
@@ -28,7 +27,7 @@ export interface Appointment {
   date: string;
   time: string;
   status: 'pending' | 'approved' | 'rejected';
-  replyMessage?: string; // Para la respuesta del programador
+  replyMessage?: string;
 }
 
 @Component({
@@ -41,17 +40,14 @@ export interface Appointment {
 export class ProgrammerComponent {
   auth = inject(AuthService);
   private db = inject(Firestore);
-
   currentUser$ = this.auth.user$;
 
-  // Observables de datos
   projects$: Observable<Project[]> | null = null;
   appointments$: Observable<Appointment[]> | null = null;
+  pendingCount$: Observable<number> | null = null; // Contador de notificaciones
 
-  // Estado de la vista: 'projects' o 'appointments'
   currentView: 'projects' | 'appointments' = 'projects';
 
-  // Modelo para formulario de proyecto
   newProject: Partial<Project> = {
     section: 'Academico',
     participation: 'Full Stack'
@@ -65,59 +61,53 @@ export class ProgrammerComponent {
         const qProjects = query(projectsRef, where('ownerUid', '==', user.uid));
         this.projects$ = collectionData(qProjects, { idField: 'id' }) as Observable<Project[]>;
 
-        // 2. Cargar Asesorías (NUEVO)
+        // 2. Cargar Asesorías
         const appointmentsRef = collection(this.db, 'appointments');
-        // Traemos solo las citas dirigidas a ESTE programador
-        const qAppointments = query(
-          appointmentsRef,
-          where('programmerId', '==', user.uid)
-        );
+        const qAppointments = query(appointmentsRef, where('programmerId', '==', user.uid));
         this.appointments$ = collectionData(qAppointments, { idField: 'id' }) as Observable<Appointment[]>;
+
+        // 3. LOGICA DEL CONTADOR (Notificación)
+        // Cuenta solo las que están en estado 'pending'
+        this.pendingCount$ = this.appointments$.pipe(
+          map(citas => citas.filter(c => c.status === 'pending').length)
+        );
       }
     });
   }
 
-  // Cambiar entre pestañas del menú lateral
   switchView(view: 'projects' | 'appointments') {
     this.currentView = view;
   }
 
-  // --- LÓGICA DE PROYECTOS ---
+  // Guardar Proyecto (Con todos los campos del PDF)
   async saveProject(userUid: string) {
-    if (!this.newProject.name) return alert('Falta el nombre');
+    if (!this.newProject.name) return alert('Falta el nombre del proyecto');
     try {
       await addDoc(collection(this.db, 'projects'), {
         ...this.newProject,
         ownerUid: userUid,
         createdAt: Date.now()
       });
+      // Reseteamos el formulario
       this.newProject = { section: 'Academico', participation: 'Full Stack', name: '', description: '', technologies: '', repoUrl: '', demoUrl: '' };
-      alert('Proyecto guardado');
+      alert('Proyecto agregado al portafolio');
     } catch (e) { console.error(e); }
   }
 
   async deleteProject(id: string) {
-    if(confirm('¿Borrar?')) await deleteDoc(doc(this.db, 'projects', id));
+    if(confirm('¿Borrar este proyecto?')) await deleteDoc(doc(this.db, 'projects', id));
   }
 
-  // --- LÓGICA DE ASESORÍAS (NUEVO) ---
-
+  // Responder Asesoría (Notificación al usuario)
   async respondAppointment(appt: Appointment, status: 'approved' | 'rejected') {
-    if (!appt.replyMessage) {
-      alert('Por favor escribe un mensaje de respuesta antes de confirmar.');
-      return;
-    }
+    if (!appt.replyMessage) return alert('Escribe un mensaje de respuesta.');
 
     try {
-      const apptRef = doc(this.db, 'appointments', appt.id!);
-      await updateDoc(apptRef, {
+      await updateDoc(doc(this.db, 'appointments', appt.id!), {
         status: status,
         replyMessage: appt.replyMessage
       });
-      alert(`Cita ${status === 'approved' ? 'Aprobada' : 'Rechazada'} correctamente.`);
-    } catch (error) {
-      console.error(error);
-      alert('Error al responder la cita.');
-    }
+      alert(`Solicitud ${status === 'approved' ? 'Aceptada' : 'Rechazada'}`);
+    } catch (error) { console.error(error); }
   }
 }

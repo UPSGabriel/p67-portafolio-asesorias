@@ -16,30 +16,41 @@ export class AdminComponent {
   auth = inject(AuthService);
   private db = inject(Firestore);
 
+  // Lista de todos los usuarios
   users$: Observable<AppUser[]> = collectionData(collection(this.db, 'users'), { idField: 'uid' }) as Observable<AppUser[]>;
 
-  selectedUser: Partial<AppUser> | null = null; // Usamos Partial para permitir que no tenga UID al inicio
+  // Variables para el Modal
+  selectedUser: Partial<AppUser> | null = null;
   isModalOpen = false;
-  isNewUser = false; // Bandera para saber si estamos creando
+  isNewUser = false; // Bandera para saber si creamos o editamos
 
-  // 1. Abrir modal para CREAR nuevo usuario
+  // Variable temporal para el input de horarios
+  newScheduleInput: string = '';
+
+  // 1. Abrir Modal para CREAR (Registrar Programador)
   openCreateModal() {
     this.isNewUser = true;
     this.selectedUser = {
-      role: 'programmer', // Por defecto creamos programadores
+      role: 'programmer',
       displayName: '',
       email: '',
-      photoURL: '',
       specialty: '',
-      description: ''
+      description: '',
+      availability: [] // Inicializamos array vacío
     };
+    this.newScheduleInput = '';
     this.isModalOpen = true;
   }
 
-  // 2. Abrir modal para EDITAR usuario existente
+  // 2. Abrir Modal para EDITAR
   editUser(user: AppUser) {
     this.isNewUser = false;
-    this.selectedUser = { ...user };
+    // Creamos una copia para no editar en tiempo real la tabla
+    this.selectedUser = {
+      ...user,
+      availability: user.availability || [] // Aseguramos que sea array
+    };
+    this.newScheduleInput = '';
     this.isModalOpen = true;
   }
 
@@ -48,64 +59,69 @@ export class AdminComponent {
     this.selectedUser = null;
   }
 
-  // 3. GUARDAR (Sirve para Crear y Editar)
+  // --- MÉTODOS DE HORARIOS ---
+  addSchedule() {
+    if (!this.newScheduleInput.trim()) return;
+    if (!this.selectedUser!.availability) {
+      this.selectedUser!.availability = [];
+    }
+    this.selectedUser!.availability!.push(this.newScheduleInput.trim());
+    this.newScheduleInput = '';
+  }
+
+  removeSchedule(index: number) {
+    this.selectedUser!.availability!.splice(index, 1);
+  }
+  // ---------------------------
+
+  // 3. GUARDAR (Crear o Actualizar)
   async saveUserChanges() {
     if (!this.selectedUser) return;
 
     try {
       if (this.isNewUser) {
-        // --- LÓGICA DE CREAR (INSERT) ---
-        const usersCollection = collection(this.db, 'users');
-        await addDoc(usersCollection, {
+        // CREAR
+        await addDoc(collection(this.db, 'users'), {
           ...this.selectedUser,
           createdAt: Date.now(),
-          // Asignamos una foto por defecto si no pone nada
-          photoURL: this.selectedUser.photoURL || 'https://ui-avatars.com/api/?name=' + this.selectedUser.displayName
+          photoURL: this.selectedUser.photoURL || `https://ui-avatars.com/api/?name=${this.selectedUser.displayName}`
         });
-        alert('Usuario programador registrado correctamente.');
-
+        alert('Programador registrado exitosamente.');
       } else {
-        // --- LÓGICA DE EDITAR (UPDATE) ---
+        // ACTUALIZAR
         if (!this.selectedUser.uid) return;
         const userRef = doc(this.db, 'users', this.selectedUser.uid);
 
         await updateDoc(userRef, {
           displayName: this.selectedUser.displayName,
-          email: this.selectedUser.email, // Permitimos editar email también
+          email: this.selectedUser.email,
           specialty: this.selectedUser.specialty || '',
           description: this.selectedUser.description || '',
           contactEmail: this.selectedUser.contactEmail || '',
           whatsapp: this.selectedUser.whatsapp || '',
           linkedin: this.selectedUser.linkedin || '',
-          github: this.selectedUser.github || ''
+          github: this.selectedUser.github || '',
+          availability: this.selectedUser.availability || [] // Guardamos los horarios
         });
-        alert('Usuario actualizado correctamente.');
+        alert('Datos actualizados correctamente.');
       }
-
       this.closeModal();
-
     } catch (error) {
-      console.error('Error al guardar:', error);
-      alert('Error al guardar. Revisa la consola.');
+      console.error('Error:', error);
+      alert('Hubo un error al guardar.');
     }
   }
 
-  // 4. Cambiar rol rápido desde la tabla
+  // 4. Cambiar Rol Rápido
   async updateRole(uid: string, event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const newRole = select.value as AppRole;
-    const userRef = doc(this.db, 'users', uid);
-    await updateDoc(userRef, { role: newRole });
+    const newRole = (event.target as HTMLSelectElement).value as AppRole;
+    await updateDoc(doc(this.db, 'users', uid), { role: newRole });
   }
 
-  // 5. Eliminar usuario
+  // 5. Eliminar Usuario
   async deleteUser(user: AppUser) {
-    if(!confirm(`¿Eliminar a ${user.displayName}?`)) return;
-    try {
-      const userRef = doc(this.db, 'users', user.uid);
-      await deleteDoc(userRef);
-    } catch (error) {
-      console.error(error);
+    if(confirm(`¿Estás seguro de eliminar a ${user.displayName}?`)) {
+      await deleteDoc(doc(this.db, 'users', user.uid));
     }
   }
 }

@@ -8,14 +8,15 @@
     </div>
 
     <nav class="menu">
-      <button (click)="switchView('projects')"
-              [class.active]="currentView === 'projects'">
+      <button (click)="switchView('projects')" [class.active]="currentView === 'projects'">
         📂 Mis Proyectos
       </button>
 
-      <button (click)="switchView('appointments')"
-              [class.active]="currentView === 'appointments'">
-        📅 Asesorías
+      <button (click)="switchView('appointments')" [class.active]="currentView === 'appointments'">
+        <span>📅 Asesorías</span>
+        <span class="notif-badge" *ngIf="(pendingCount$ | async) as count">
+          <ng-container *ngIf="count > 0">+{{ count }}</ng-container>
+        </span>
       </button>
     </nav>
 
@@ -35,49 +36,83 @@
       <div class="card form-card">
         <h3>Nuevo Proyecto</h3>
         <div class="form-grid">
-          <div class="full-width"><label>Nombre</label><input [(ngModel)]="newProject.name"></div>
-          <div><label>Sección</label><select [(ngModel)]="newProject.section"><option value="Academico">Académico</option><option value="Laboral">Laboral</option></select></div>
-          <div><label>Rol</label><input [(ngModel)]="newProject.participation"></div>
-          <div class="full-width"><label>Tecnologías</label><input [(ngModel)]="newProject.technologies"></div>
-          <div class="full-width"><label>Descripción</label><textarea [(ngModel)]="newProject.description"></textarea></div>
-          <div><label>Repo</label><input [(ngModel)]="newProject.repoUrl"></div>
-          <div><label>Demo</label><input [(ngModel)]="newProject.demoUrl"></div>
+          <div class="full-width">
+            <label>Nombre del Proyecto</label>
+            <input [(ngModel)]="newProject.name" placeholder="Ej: Sistema de Ventas">
+          </div>
+
+          <div>
+            <label>Sección (PDF)</label>
+            <select [(ngModel)]="newProject.section">
+              <option value="Academico">Proyecto Académico</option>
+              <option value="Laboral">Proyecto Laboral</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Rol / Participación</label>
+            <input [(ngModel)]="newProject.participation" placeholder="Ej: Backend, DB">
+          </div>
+
+          <div class="full-width">
+            <label>Tecnologías Utilizadas</label>
+            <input [(ngModel)]="newProject.technologies" placeholder="Ej: Angular, Firebase, Spring Boot">
+          </div>
+
+          <div class="full-width">
+            <label>Descripción</label>
+            <textarea [(ngModel)]="newProject.description" placeholder="Breve descripción..."></textarea>
+          </div>
+
+          <div>
+            <label>Enlace Repositorio</label>
+            <input [(ngModel)]="newProject.repoUrl" placeholder="https://github.com/...">
+          </div>
+
+          <div>
+            <label>Enlace Despliegue (Demo)</label>
+            <input [(ngModel)]="newProject.demoUrl" placeholder="https://mi-app.web.app">
+          </div>
         </div>
         <div class="card-actions">
-          <button class="btn-primary" (click)="saveProject(user.uid)">+ Guardar</button>
+          <button class="btn-primary" (click)="saveProject(user.uid)">+ Guardar Proyecto</button>
         </div>
       </div>
 
       <div class="projects-list">
+        <h3>Proyectos Publicados</h3>
         <div class="project-card" *ngFor="let p of projects$ | async">
           <div class="project-info">
-            <h4>{{ p.name }} <span class="tag">{{ p.section }}</span></h4>
+            <h4>{{ p.name }}
+              <span class="tag" [ngClass]="p.section === 'Academico' ? 'academico' : 'laboral'">
+                 {{ p.section }}
+               </span>
+            </h4>
             <p>{{ p.description }}</p>
+            <div class="techs"><small>🛠 {{ p.technologies }} | 👤 {{ p.participation }}</small></div>
+            <div class="links">
+              <a *ngIf="p.repoUrl" [href]="p.repoUrl" target="_blank">Ver Código</a>
+              <a *ngIf="p.demoUrl" [href]="p.demoUrl" target="_blank">Ver Demo</a>
+            </div>
           </div>
           <button class="btn-delete" (click)="deleteProject(p.id!)">&times;</button>
         </div>
+        <p *ngIf="(projects$ | async)?.length === 0" class="empty-state">No tienes proyectos aún.</p>
       </div>
     </div>
-
 
     <div *ngIf="currentView === 'appointments'" class="fade-in">
       <header>
         <h1>Solicitudes de Asesoría</h1>
-        <p>Gestiona tus reuniones con clientes y estudiantes.</p>
+        <p>Gestiona tus reuniones con clientes.</p>
       </header>
 
       <div class="appointments-grid">
         <div class="appt-card" *ngFor="let appt of appointments$ | async">
-
           <div class="appt-header">
-            <span class="date-badge">
-              📅 {{ appt.date }} | 🕒 {{ appt.time }}
-            </span>
-            <span class="status-badge" [ngClass]="appt.status">
-              {{ appt.status | uppercase }}
-            </span>
+            <span class="date-badge">📅 {{ appt.date }} | 🕒 {{ appt.time }}</span>
+            <span class="status-badge" [ngClass]="appt.status">{{ appt.status | uppercase }}</span>
           </div>
-
           <div class="appt-body">
             <h3>{{ appt.userName }}</h3>
             <p class="contact">📧 {{ appt.userContact }}</p>
@@ -88,12 +123,10 @@
           </div>
 
           <div class="appt-actions" *ngIf="appt.status === 'pending'">
-            <textarea [(ngModel)]="appt.replyMessage"
-                      placeholder="Escribe un mensaje para aceptar o rechazar (Ej: Confirmado, te envío link de Meet...)"></textarea>
-
+            <textarea [(ngModel)]="appt.replyMessage" placeholder="Escribe un mensaje de respuesta..."></textarea>
             <div class="buttons">
               <button class="btn-reject" (click)="respondAppointment(appt, 'rejected')">Rechazar</button>
-              <button class="btn-accept" (click)="respondAppointment(appt, 'approved')">Aprobar Cita</button>
+              <button class="btn-accept" (click)="respondAppointment(appt, 'approved')">Aprobar</button>
             </div>
           </div>
 
@@ -101,11 +134,10 @@
             <strong>Tu respuesta:</strong>
             <p>{{ appt.replyMessage }}</p>
           </div>
-
         </div>
 
         <div *ngIf="(appointments$ | async)?.length === 0" class="empty-state">
-          <p>🎉 No tienes solicitudes de asesoría pendientes.</p>
+          <p>🎉 No tienes solicitudes pendientes.</p>
         </div>
       </div>
     </div>

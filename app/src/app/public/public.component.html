@@ -2,14 +2,24 @@
   <header class="hero">
     <nav class="top-nav">
       <div class="logo">P67 Servicios</div>
-      
-      <button class="logout-btn" (click)="logout()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
-          <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-        </svg>
-        Cerrar Sesión
-      </button>
+
+      <div class="nav-actions" *ngIf="auth.user$ | async as user; else loginBtn">
+
+        <button class="my-appts-btn" (click)="showMyAppointments = true">
+          📩 Mis Solicitudes
+          <span class="notif-badge-float" *ngIf="(unreadCount$ | async) as count">
+             <ng-container *ngIf="count > 0">+{{ count }}</ng-container>
+          </span>
+        </button>
+
+        <button class="logout-btn" (click)="logout()">
+          Cerrar Sesión
+        </button>
+      </div>
+
+      <ng-template #loginBtn>
+        <button class="login-link" (click)="auth.loginWithGoogle()">Iniciar Sesión</button>
+      </ng-template>
     </nav>
 
     <div class="hero-content">
@@ -21,42 +31,42 @@
 
   <section id="programmers" class="programmers-section">
     <h2>Programadores Disponibles</h2>
-    
+
     <div class="grid">
       <div class="card" *ngFor="let dev of programmers$ | async">
         <div class="card-header">
           <img [src]="dev.photoURL || 'https://ui-avatars.com/api/?name='+dev.displayName" class="avatar">
           <div class="badges">
-            <span class="badge">{{ dev.role | uppercase }}</span>
+            <span class="badge">{{ dev.specialty || 'PROGRAMADOR' }}</span>
           </div>
         </div>
         <div class="card-body">
           <h3>{{ dev.displayName }}</h3>
-          <p>{{ dev.email }}</p>
-          <p class="desc">Programador listo para ayudarte en tus proyectos.</p>
+          <p class="desc">{{ dev.description || 'Programador listo para ayudarte en tus proyectos.' }}</p>
         </div>
         <div class="card-footer">
-          <button class="btn-primary" (click)="openSchedule(dev)">Agendar Asesoría</button>
+          <button *ngIf="auth.user$ | async" class="btn-primary" (click)="openSchedule(dev)">
+            Agendar Asesoría
+          </button>
+          <p *ngIf="!(auth.user$ | async)" style="font-size: 0.8rem; color: #666;">
+            Inicia sesión para agendar
+          </p>
         </div>
       </div>
     </div>
-
-    <p *ngIf="(programmers$ | async)?.length === 0" style="text-align:center">
-      No hay programadores registrados aún.
-    </p>
   </section>
 
   <footer>
     <p>© 2025 Proyecto Integrador P67</p>
   </footer>
 
-  <div class="modal-overlay" *ngIf="selectedProgrammer">
+  <div class="modal-overlay" *ngIf="selectedProgrammer && (auth.user$ | async) as user">
     <div class="modal-content">
       <div class="modal-header">
         <h3>Agendar con {{ selectedProgrammer.displayName }}</h3>
         <button class="close-btn" (click)="closeModal()">×</button>
       </div>
-      
+
       <div class="modal-body">
         <label>Tu Nombre:</label>
         <input type="text" [(ngModel)]="appointmentForm.userName" placeholder="Ej: Juan Pérez">
@@ -68,20 +78,48 @@
         <textarea [(ngModel)]="appointmentForm.topic" placeholder="Ej: Necesito ayuda con Angular services..."></textarea>
 
         <div class="date-row">
-          <div>
-            <label>Fecha:</label>
-            <input type="date" [(ngModel)]="appointmentForm.date">
-          </div>
-          <div>
-            <label>Hora:</label>
-            <input type="time" [(ngModel)]="appointmentForm.time">
-          </div>
+          <div><label>Fecha:</label><input type="date" [(ngModel)]="appointmentForm.date"></div>
+          <div><label>Hora:</label><input type="time" [(ngModel)]="appointmentForm.time"></div>
         </div>
       </div>
 
       <div class="modal-footer">
         <button class="cancel" (click)="closeModal()">Cancelar</button>
-        <button class="confirm" (click)="submitAppointment()">Enviar Solicitud</button>
+        <button class="confirm" (click)="submitAppointment(user.uid)">Enviar Solicitud</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showMyAppointments">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Mis Solicitudes Enviadas</h3>
+        <button class="close-btn" (click)="showMyAppointments = false">×</button>
+      </div>
+
+      <div class="modal-body scrollable-body">
+        <div class="appt-item" *ngFor="let appt of myAppointments$ | async">
+          <div class="appt-top">
+            <strong>Mentor: {{ appt.programmerName }}</strong>
+            <span class="status-pill" [ngClass]="appt.status">
+              {{ appt.status === 'pending' ? 'PENDIENTE' :
+              appt.status === 'approved' ? 'APROBADA' : 'RECHAZADA' }}
+            </span>
+          </div>
+
+          <p class="appt-date">📅 {{ appt.date }} a las {{ appt.time }}</p>
+          <p class="appt-topic">Tema: {{ appt.topic }}</p>
+
+          <div class="reply-box" *ngIf="appt.replyMessage">
+            <small>Mensaje del mentor:</small>
+            <p>"{{ appt.replyMessage }}"</p>
+          </div>
+          <hr>
+        </div>
+
+        <div *ngIf="(myAppointments$ | async)?.length === 0" class="empty-state">
+          <p>No has enviado ninguna solicitud todavía.</p>
+        </div>
       </div>
     </div>
   </div>
