@@ -1,4 +1,4 @@
-import 'zone.js/node'; // Requerido para SSR
+import 'zone.js/node'; 
 
 import { BootstrapContext, bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
