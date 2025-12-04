@@ -1,29 +1,31 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, UrlTree } from '@angular/router';
-import { map } from 'rxjs';
+import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
-import { AppUser } from './auth.service';
+import { map, take } from 'rxjs';
 
-export const roleGuard: CanActivateFn = (route, state) => {
-  const auth = inject(AuthService);
-  const router = inject(Router);
+export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
+  return () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
 
-  const expectedRoles = route.data['roles'] as AppUser['role'][] | undefined;
+    return auth.user$.pipe(
+      take(1), 
+      map(user => {
 
-  return auth.user$.pipe(
-    map(user => {
-      // Si no se pide rol específico, solo verificar que esté logueado
-      if (!expectedRoles || expectedRoles.length === 0) {
-        return !!user || router.createUrlTree(['/login']);
-      }
+        if (!user) {
+          return router.createUrlTree(['/login']);
+        }
 
-      // Si sí se pide rol y el usuario lo tiene
-      if (user && expectedRoles.includes(user.role)) {
-        return true;
-      }
 
-      // No autorizado → al login
-      return router.createUrlTree(['/login']);
-    })
-  );
+        if (allowedRoles.includes(user.role)) {
+          return true;
+        }
+
+        if (user.role === 'programmer') return router.createUrlTree(['/programmer']);
+        if (user.role === 'admin') return router.createUrlTree(['/admin']);
+        
+        return router.createUrlTree(['/public']);
+      })
+    );
+  };
 };

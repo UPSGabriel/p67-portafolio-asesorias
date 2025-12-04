@@ -1,0 +1,39 @@
+<div class="admin-container">
+  <header>
+    <h1>Panel de Administrador</h1>
+    <button (click)="auth.logout()">Cerrar Sesión</button>
+  </header>
+
+  <div class="users-list">
+    <h3>Gestión de Usuarios</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Email</th>
+          <th>Rol Actual</th>
+          <th>Cambiar Rol</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of users$ | async">
+          <td>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <img [src]="u.photoURL" width="30" style="border-radius:50%">
+              {{ u.displayName }}
+            </div>
+          </td>
+          <td>{{ u.email }}</td>
+          <td><strong>{{ u.role }}</strong></td>
+          <td>
+            <select [value]="u.role" (change)="updateRole(u.uid, $event)">
+              <option value="user">User (Público)</option>
+              <option value="programmer">Programmer</option>
+              <option value="admin">Admin</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-public',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './public.component.html',
   styleUrl: './public.component.scss',
 })
