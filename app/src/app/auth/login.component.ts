@@ -9,6 +9,8 @@ import { Observable } from 'rxjs';
   imports: [CommonModule],
   templateUrl: './login.html',
   styleUrls: ['./login.scss'],
+  
+
 })
 export class LoginComponent {
   private auth = inject(AuthService);

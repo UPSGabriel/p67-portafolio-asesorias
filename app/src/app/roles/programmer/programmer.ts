@@ -12,6 +12,7 @@ import { Observable, switchMap, of, combineLatest, map } from 'rxjs';
   imports: [CommonModule, FormsModule],
   templateUrl: './programmer.html',
   styleUrls: ['./programmer.scss']
+  
 })
 
 export class ProgrammerComponent {
