@@ -1,42 +1,37 @@
-<header class="header">
-  <h1>Portafolio Público</h1>
-  <p>Bienvenido a mi página pública del proyecto integrador.</p>
-</header>
-
-<section class="seccion">
-  <h2>Portafolio</h2>
-
-  <div class="grid">
-    <div class="card" *ngFor="let p of proyectos">
-      <img [src]="p.imagen" alt="Imagen proyecto">
-      <h3>{{ p.titulo }}</h3>
-      <p>{{ p.descripcion }}</p>
-      <button>Ver más</button>
+<div class="public-container">
+  <header class="hero">
+    <div class="hero-content">
+      <h1>Encuentra a tu <span class="highlight">Mentor Ideal</span></h1>
+      <p>Conecta con programadores expertos para llevar tus proyectos al siguiente nivel.</p>
+      <button class="cta-btn" (click)="scrollTo('programmers')">Ver Programadores</button>
     </div>
-  </div>
-</section>
+  </header>
 
-<section class="seccion">
-  <h2>Habilidades</h2>
+  <section id="programmers" class="programmers-section">
+    <h2>Nuestros Expertos</h2>
+    <div class="grid">
+      <div class="card" *ngFor="let dev of programmers">
+        <div class="card-header">
+          <img [src]="dev.photo" [alt]="dev.name" class="avatar">
+          <div class="badges">
+            <span class="badge" *ngFor="let skill of dev.skills">{{ skill }}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3>{{ dev.name }}</h3>
+          <h4>{{ dev.specialty }}</h4>
+          <p>{{ dev.desc }}</p>
+        </div>
+        <div class="card-footer">
+          <button class="btn-outline">Ver Portafolio</button>
+          <button class="btn-primary">Agendar Asesoría</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <div class="chips">
-    <span *ngFor="let skill of habilidades" class="chip">
-      {{ skill }}
-    </span>
-  </div>
-</section>
-
-<section class="seccion">
-  <h2>Contacto</h2>
-  
-  <form>
-    <label>Nombre</label>
-    <input type="text" placeholder="Tu nombre">
-
-    <label>Mensaje</label>
-    <textarea placeholder="Escribe tu mensaje"></textarea>
-
-    <button type="button">Enviar</button>
-  </form>
-</section>
+  <footer>
+    <p>© 2025 Proyecto Integrador P67 - Daniel & Gabriel</p>
+  </footer>
+</div>
 

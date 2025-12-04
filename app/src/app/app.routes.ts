@@ -9,7 +9,7 @@ export const routes: Routes = [
 
   {
     path: 'public',
-    loadComponent: () => import('./public/public.component').then(m => m.Public)
+    loadComponent: () => import('./public/public.component').then(m => m.PublicComponent)
   },
 
 
