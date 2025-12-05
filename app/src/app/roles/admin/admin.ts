@@ -16,18 +16,14 @@ export class AdminComponent {
   auth = inject(AuthService);
   private db = inject(Firestore);
 
-  // Lista de todos los usuarios
   users$: Observable<AppUser[]> = collectionData(collection(this.db, 'users'), { idField: 'uid' }) as Observable<AppUser[]>;
 
-  // Variables para el Modal
   selectedUser: Partial<AppUser> | null = null;
   isModalOpen = false;
-  isNewUser = false; // Bandera para saber si creamos o editamos
+  isNewUser = false; 
 
-  // Variable temporal para el input de horarios
   newScheduleInput: string = '';
 
-  // 1. Abrir Modal para CREAR (Registrar Programador)
   openCreateModal() {
     this.isNewUser = true;
     this.selectedUser = {
@@ -36,19 +32,17 @@ export class AdminComponent {
       email: '',
       specialty: '',
       description: '',
-      availability: [] // Inicializamos array vacío
+      availability: [] 
     };
     this.newScheduleInput = '';
     this.isModalOpen = true;
   }
 
-  // 2. Abrir Modal para EDITAR
   editUser(user: AppUser) {
     this.isNewUser = false;
-    // Creamos una copia para no editar en tiempo real la tabla
     this.selectedUser = {
       ...user,
-      availability: user.availability || [] // Aseguramos que sea array
+      availability: user.availability || [] 
     };
     this.newScheduleInput = '';
     this.isModalOpen = true;
@@ -59,7 +53,6 @@ export class AdminComponent {
     this.selectedUser = null;
   }
 
-  // --- MÉTODOS DE HORARIOS ---
   addSchedule() {
     if (!this.newScheduleInput.trim()) return;
     if (!this.selectedUser!.availability) {
@@ -72,15 +65,12 @@ export class AdminComponent {
   removeSchedule(index: number) {
     this.selectedUser!.availability!.splice(index, 1);
   }
-  // ---------------------------
 
-  // 3. GUARDAR (Crear o Actualizar)
   async saveUserChanges() {
     if (!this.selectedUser) return;
 
     try {
       if (this.isNewUser) {
-        // CREAR
         await addDoc(collection(this.db, 'users'), {
           ...this.selectedUser,
           createdAt: Date.now(),
@@ -88,7 +78,6 @@ export class AdminComponent {
         });
         alert('Programador registrado exitosamente.');
       } else {
-        // ACTUALIZAR
         if (!this.selectedUser.uid) return;
         const userRef = doc(this.db, 'users', this.selectedUser.uid);
 
@@ -101,7 +90,7 @@ export class AdminComponent {
           whatsapp: this.selectedUser.whatsapp || '',
           linkedin: this.selectedUser.linkedin || '',
           github: this.selectedUser.github || '',
-          availability: this.selectedUser.availability || [] // Guardamos los horarios
+          availability: this.selectedUser.availability || [] 
         });
         alert('Datos actualizados correctamente.');
       }
@@ -112,13 +101,11 @@ export class AdminComponent {
     }
   }
 
-  // 4. Cambiar Rol Rápido
   async updateRole(uid: string, event: Event) {
     const newRole = (event.target as HTMLSelectElement).value as AppRole;
     await updateDoc(doc(this.db, 'users', uid), { role: newRole });
   }
 
-  // 5. Eliminar Usuario
   async deleteUser(user: AppUser) {
     if(confirm(`¿Estás seguro de eliminar a ${user.displayName}?`)) {
       await deleteDoc(doc(this.db, 'users', user.uid));

@@ -15,7 +15,7 @@ export interface AppUser {
   role: AppRole;
   createdAt?: number;
 
-  // Campos de Perfil de Programador
+
   specialty?: string;
   description?: string;
   contactEmail?: string;
@@ -23,7 +23,7 @@ export interface AppUser {
   linkedin?: string;
   github?: string;
 
-  // NUEVO: Horarios de Disponibilidad (Array de strings)
+  
   availability?: string[];
 }
 
@@ -33,7 +33,7 @@ export class AuthService {
   private db = inject(Firestore);
   private router = inject(Router);
 
-  // Observable del usuario actual con sus datos de Firestore en tiempo real
+
   readonly user$: Observable<AppUser | null> = user(this.auth).pipe(
     switchMap(u => {
       if (!u) return of(null);
@@ -61,20 +61,18 @@ export class AuthService {
       const ref = doc(this.db, 'users', u.uid);
       const snap = await getDoc(ref);
 
-      // Si es usuario nuevo, lo creamos en Firestore
       if (!snap.exists()) {
         const nuevo: AppUser = {
           uid: u.uid,
           displayName: u.displayName,
           email: u.email,
           photoURL: u.photoURL,
-          role: 'user', // Por defecto todos son 'user'
+          role: 'user', 
           createdAt: Date.now(),
         };
         await setDoc(ref, nuevo);
       }
 
-      // Redirigir según el rol que tenga en la BD
       const finalDoc = await getDoc(ref);
       const userData = finalDoc.data() as AppUser;
       this.router.navigateByUrl(this.getHomeForRole(userData.role));

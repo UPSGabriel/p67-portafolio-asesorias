@@ -123,9 +123,7 @@
   }
 }
 
-/* =========================================
-   ESTILOS DEL MODAL (Agrega esto al final)
-   ========================================= */
+
 
 .modal-overlay {
   position: fixed;
@@ -133,8 +131,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
-  backdrop-filter: blur(4px); /* Efecto borroso moderno (Glassmorphism) */
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px); 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -146,18 +144,15 @@
   background: white;
   width: 90%;
   max-width: 500px;
-  /* Usamos el mismo radio que tus cards para consistencia */
   border-radius: 15px;
-  /* Usamos una sombra similar a tus cards pero más pronunciada por estar flotando */
   box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-  padding: 0; /* Quitamos padding general para manejar cabecera y cuerpo separado */
-  overflow: hidden; /* Para que la cabecera respete los bordes redondos */
+  padding: 0; 
+  overflow: hidden; 
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
 }
 
-/* Cabecera con tu degradado Hero para mantener identidad */
 .modal-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 1.5rem 2rem;
@@ -201,7 +196,7 @@
   label {
     display: block;
     font-weight: 600;
-    color: #4a5568; /* Mismo gris que usas en .card-body p */
+    color: #4a5568; 
     margin-bottom: 0.3rem;
     font-size: 0.9rem;
   }
@@ -209,7 +204,7 @@
   input, textarea {
     width: 100%;
     padding: 10px 15px;
-    border: 1px solid #e2e8f0; /* Color suave similar a tus badges */
+    border: 1px solid #e2e8f0; 
     border-radius: 8px;
     font-family: 'Segoe UI', sans-serif;
     font-size: 0.95rem;
@@ -218,7 +213,7 @@
 
     &:focus {
       outline: none;
-      border-color: #667eea; /* Tu color primario */
+      border-color: #667eea; 
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
   }
@@ -246,7 +241,7 @@
 
   button {
     padding: 10px 20px;
-    border-radius: 30px; /* Igual que tu .cta-btn */
+    border-radius: 30px; 
     font-weight: 600;
     cursor: pointer;
     border: none;
@@ -263,7 +258,7 @@
   }
 
   .confirm {
-    /* Reutilizamos tu estilo de botón primario */
+   
     background: #667eea;
     color: white;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -274,7 +269,6 @@
   }
 }
 
-/* Animaciones suaves */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -285,17 +279,14 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* --- Estilos Generales (mantén los que tenías) --- */
 .public-container { font-family: 'Segoe UI', sans-serif; }
 
-/* NAV ACTIONS (Para alinear botones) */
 .nav-actions {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Botón Mis Solicitudes */
 .my-appts-btn {
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -312,7 +303,6 @@
   }
 }
 
-/* --- ESTILOS DEL MODAL DE LISTA --- */
 .scrollable-body {
   max-height: 60vh;
   overflow-y: auto;
@@ -358,7 +348,6 @@
 
 hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
 
-/* --- RESPONSIVE PARA MÓVIL (Pega esto al final de public.component.scss) --- */
 @media (max-width: 768px) {
   .hero {
     padding: 3rem 1rem;
@@ -380,24 +369,22 @@ hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
   }
 
   .grid {
-    grid-template-columns: 1fr; /* Una sola columna de tarjetas */
+    grid-template-columns: 1fr; 
     padding: 0 1rem;
   }
 
-  /* Ajuste de Modales en Móvil */
   .modal-content {
     width: 95%;
     padding: 1rem;
-    max-height: 85vh; /* Evita que se salga de la pantalla */
+    max-height: 85vh; 
   }
 
   .date-row {
-    flex-direction: column; /* Fecha y hora uno debajo del otro */
+    flex-direction: column; 
   }
 }
 .public-container { font-family: 'Segoe UI', sans-serif; color: #333; }
 
-/* Navbar y Acciones */
 .top-nav {
   display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 2rem;
   .logo { font-weight: bold; font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); }
@@ -412,7 +399,7 @@ hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
   .login-link { background: white; color: #667eea; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; }
 }
 
-/* Botón Mis Solicitudes con NOTIFICACIÓN */
+
 .my-appts-btn {
   background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.5); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s; position: relative; /* Clave para el globo */
   &:hover { background: white; color: #667eea; }
@@ -423,14 +410,13 @@ hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
 }
 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
-/* Hero Section */
+
 .hero {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 2rem; text-align: center; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px; padding-top: 20px;
   h1 { font-size: 3rem; margin-bottom: 1rem; } .highlight { color: #ffd700; } p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem; }
   .cta-btn { background: white; color: #764ba2; padding: 12px 30px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: transform 0.2s; &:hover { transform: scale(1.05); } }
 }
 
-/* Tarjetas Programadores */
 .programmers-section { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; h2 { text-align: center; margin-bottom: 3rem; color: #444; font-size: 2rem; } }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
 .card {
@@ -440,7 +426,6 @@ hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
   .card-footer { padding: 20px; display: flex; gap: 10px; justify-content: center; border-top: 1px solid #edf2f7; .btn-primary { background: #667eea; color: white; padding: 8px 16px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; &:hover { background: #5a67d8; } } }
 }
 
-/* Modales */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out; }
 .modal-content { background: white; width: 90%; max-width: 500px; border-radius: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); padding: 0; overflow: hidden; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
 .modal-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; h3 { margin: 0; font-size: 1.25rem; font-weight: 600; } .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.5rem; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; &:hover { background: rgba(255,255,255,0.4); } } }
@@ -448,7 +433,6 @@ hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
 .date-row { display: flex; gap: 15px; > div { flex: 1; } }
 .modal-footer { padding: 1rem 2rem 2rem; display: flex; justify-content: flex-end; gap: 10px; button { padding: 10px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; border: none; transition: transform 0.2s; &:hover { transform: translateY(-2px); } } .cancel { background: #f1f5f9; color: #64748b; } .confirm { background: #667eea; color: white; } }
 
-/* Estilos de Lista (Mis Solicitudes) */
 .scrollable-body { max-height: 60vh; overflow-y: auto; }
 .appt-item { margin-bottom: 1.5rem; }
 .appt-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
@@ -458,11 +442,9 @@ hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
 .reply-box { background-color: #f3f4f6; padding: 10px; border-radius: 8px; margin-top: 8px; border-left: 4px solid #667eea; small { color: #667eea; font-weight: bold; } p { margin: 5px 0 0; color: #374151; } }
 hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
 
-/* Animaciones */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* Responsive */
 @media (max-width: 768px) {
   .hero { padding: 3rem 1rem; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; h1 { font-size: 2rem; } }
   .top-nav { flex-direction: column; gap: 1rem; .nav-actions { width: 100%; justify-content: center; } }

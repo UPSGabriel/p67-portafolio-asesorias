@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
-// IMPORTANTE: Agregamos 'map' aquí para que funcione el contador
 import { Observable, map } from 'rxjs';
 import { Firestore, collection, addDoc, collectionData, query, where, deleteDoc, doc, updateDoc } from '@angular/fire/firestore';
 
@@ -11,11 +10,11 @@ export interface Project {
   ownerUid: string;
   name: string;
   description: string;
-  section: 'Academico' | 'Laboral'; // Requisito PDF
-  participation: string;            // Requisito PDF
-  technologies: string;             // Requisito PDF
-  repoUrl: string;                  // Requisito PDF
-  demoUrl: string;                  // Requisito PDF
+  section: 'Academico' | 'Laboral';
+  participation: string;            
+  technologies: string;             
+  repoUrl: string;                  
+  demoUrl: string;                 
 }
 
 export interface Appointment {
@@ -44,7 +43,7 @@ export class ProgrammerComponent {
 
   projects$: Observable<Project[]> | null = null;
   appointments$: Observable<Appointment[]> | null = null;
-  pendingCount$: Observable<number> | null = null; // Contador de notificaciones
+  pendingCount$: Observable<number> | null = null; 
 
   currentView: 'projects' | 'appointments' = 'projects';
 
@@ -56,18 +55,14 @@ export class ProgrammerComponent {
   constructor() {
     this.currentUser$.subscribe(user => {
       if (user) {
-        // 1. Cargar Proyectos
         const projectsRef = collection(this.db, 'projects');
         const qProjects = query(projectsRef, where('ownerUid', '==', user.uid));
         this.projects$ = collectionData(qProjects, { idField: 'id' }) as Observable<Project[]>;
 
-        // 2. Cargar Asesorías
         const appointmentsRef = collection(this.db, 'appointments');
         const qAppointments = query(appointmentsRef, where('programmerId', '==', user.uid));
         this.appointments$ = collectionData(qAppointments, { idField: 'id' }) as Observable<Appointment[]>;
 
-        // 3. LOGICA DEL CONTADOR (Notificación)
-        // Cuenta solo las que están en estado 'pending'
         this.pendingCount$ = this.appointments$.pipe(
           map(citas => citas.filter(c => c.status === 'pending').length)
         );
@@ -79,7 +74,6 @@ export class ProgrammerComponent {
     this.currentView = view;
   }
 
-  // Guardar Proyecto (Con todos los campos del PDF)
   async saveProject(userUid: string) {
     if (!this.newProject.name) return alert('Falta el nombre del proyecto');
     try {
@@ -88,7 +82,6 @@ export class ProgrammerComponent {
         ownerUid: userUid,
         createdAt: Date.now()
       });
-      // Reseteamos el formulario
       this.newProject = { section: 'Academico', participation: 'Full Stack', name: '', description: '', technologies: '', repoUrl: '', demoUrl: '' };
       alert('Proyecto agregado al portafolio');
     } catch (e) { console.error(e); }
@@ -98,7 +91,6 @@ export class ProgrammerComponent {
     if(confirm('¿Borrar este proyecto?')) await deleteDoc(doc(this.db, 'projects', id));
   }
 
-  // Responder Asesoría (Notificación al usuario)
   async respondAppointment(appt: Appointment, status: 'approved' | 'rejected') {
     if (!appt.replyMessage) return alert('Escribe un mensaje de respuesta.');
 
