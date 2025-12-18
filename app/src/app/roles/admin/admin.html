@@ -75,11 +75,13 @@
         <label>Descripción:</label>
         <textarea [(ngModel)]="selectedUser.description" placeholder="Resumen breve..."></textarea>
 
-        <label>WhatsApp:</label>
-        <input [(ngModel)]="selectedUser.whatsapp" placeholder="+593 99...">
+        <label>WhatsApp (Solo números y +):</label>
+        <input [ngModel]="selectedUser.whatsapp" 
+               (input)="validateWhatsappInput($event)"
+               placeholder="+593 99...">
 
-        <label>GitHub:</label>
-        <input [(ngModel)]="selectedUser.github" placeholder="URL GitHub">
+        <label>GitHub <span style="color:red">*</span>:</label>
+        <input [(ngModel)]="selectedUser.github" placeholder="URL GitHub (Obligatorio)">
 
         <div class="section-title" style="margin-top: 1.5rem;">
           📅 Horarios de Disponibilidad

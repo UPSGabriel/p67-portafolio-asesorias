@@ -17,12 +17,12 @@ export class PublicComponent {
   private db = inject(Firestore);
 
   programmers$: Observable<AppUser[]>;
-
   myAppointments$: Observable<any[]> = of([]);
-
   unreadCount$: Observable<number>;
 
   showMyAppointments = false;
+  notificationsRead = false; 
+
   selectedProgrammer: AppUser | null = null;
 
   appointmentForm = {
@@ -56,6 +56,11 @@ export class PublicComponent {
     );
   }
 
+ 
+  openMyAppointmentsModal() {
+    this.showMyAppointments = true;
+    this.notificationsRead = true; 
+  }
 
   openSchedule(dev: AppUser) {
     this.selectedProgrammer = dev;
@@ -66,9 +71,32 @@ export class PublicComponent {
     this.selectedProgrammer = null;
   }
 
+
   async submitAppointment(userUid: string) {
-    if (!this.appointmentForm.userName || !this.appointmentForm.date || !this.selectedProgrammer) {
-      alert('Por favor completa los campos obligatorios.');
+
+    if (!this.appointmentForm.userName || !this.appointmentForm.date || !this.appointmentForm.time || !this.selectedProgrammer) {
+      alert('Por favor completa todos los campos, incluyendo fecha y hora.');
+      return;
+    }
+
+    const selectedDate = this.appointmentForm.date; 
+    const selectedTime = this.appointmentForm.time; 
+    const availability = this.selectedProgrammer.availability || [];
+
+ 
+    const dateObj = new Date(selectedDate + 'T12:00:00'); 
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
+    const dayName = days[dateObj.getDay()]; 
+
+    const matchingSlot = availability.find(slot => slot.toLowerCase().includes(dayName.toLowerCase()));
+
+    if (!matchingSlot) {
+      alert(`⛔ El programador no atiende los días ${dayName}. Por favor revisa sus horarios en la tarjeta.`);
+      return;
+    }
+
+    if (!this.isTimeWithinRange(selectedTime, matchingSlot)) {
+      alert(`⛔ La hora seleccionada (${selectedTime}) está fuera del rango de atención del ${dayName} (${matchingSlot}).`);
       return;
     }
 
@@ -88,13 +116,26 @@ export class PublicComponent {
         createdAt: Date.now()
       });
 
-      alert('¡Solicitud enviada! Te avisaremos cuando el mentor responda.');
+      alert('¡Solicitud enviada exitosamente! ✅');
       this.closeModal();
 
     } catch (error) {
       console.error('Error al agendar:', error);
       alert('Error al enviar solicitud.');
     }
+  }
+
+  isTimeWithinRange(selectedTime: string, slotString: string): boolean {
+    const times = slotString.match(/(\d{1,2}:\d{2})/g);
+    
+    if (times && times.length >= 2) {
+      const startTime = times[0]; // Ej: 14:00
+      const endTime = times[1];   // Ej: 16:00
+
+      return selectedTime >= startTime && selectedTime <= endTime;
+    }
+    
+    return true; 
   }
 
   scrollTo(id: string) {

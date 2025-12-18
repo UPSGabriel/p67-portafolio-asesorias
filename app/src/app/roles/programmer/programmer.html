@@ -34,7 +34,8 @@
       </header>
 
       <div class="card form-card">
-        <h3>Nuevo Proyecto</h3>
+        <h3>{{ editingProjectId ? '✏️ Editar Proyecto' : '➕ Nuevo Proyecto' }}</h3>
+        
         <div class="form-grid">
           <div class="full-width">
             <label>Nombre del Proyecto</label>
@@ -65,7 +66,7 @@
           </div>
 
           <div>
-            <label>Enlace Repositorio</label>
+            <label>Enlace Repositorio <span style="color:red">*</span></label>
             <input [(ngModel)]="newProject.repoUrl" placeholder="https://github.com/...">
           </div>
 
@@ -74,8 +75,13 @@
             <input [(ngModel)]="newProject.demoUrl" placeholder="https://mi-app.web.app">
           </div>
         </div>
+        
         <div class="card-actions">
-          <button class="btn-primary" (click)="saveProject(user.uid)">+ Guardar Proyecto</button>
+          <button *ngIf="editingProjectId" class="btn-secondary" (click)="cancelEdit()">Cancelar</button>
+          
+          <button class="btn-primary" (click)="saveProject(user.uid)">
+            {{ editingProjectId ? '💾 Actualizar Proyecto' : '+ Guardar Proyecto' }}
+          </button>
         </div>
       </div>
 
@@ -95,7 +101,11 @@
               <a *ngIf="p.demoUrl" [href]="p.demoUrl" target="_blank">Ver Demo</a>
             </div>
           </div>
-          <button class="btn-delete" (click)="deleteProject(p.id!)">&times;</button>
+          
+          <div class="card-buttons-right">
+             <button class="btn-edit" (click)="startEditing(p)" title="Editar">✏️</button>
+             <button class="btn-delete" (click)="deleteProject(p.id!)" title="Eliminar">&times;</button>
+          </div>
         </div>
         <p *ngIf="(projects$ | async)?.length === 0" class="empty-state">No tienes proyectos aún.</p>
       </div>

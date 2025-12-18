@@ -452,3 +452,29 @@ hr { border: 0; border-top: 1px solid #eee; margin-top: 1rem; }
   .modal-content { width: 95%; max-height: 85vh; padding: 1rem; }
   .date-row { flex-direction: column; }
 }
+
+.availability-info {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  
+  strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #444;
+  }
+
+  .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .time-tag {
+    background: #eef2ff;
+    color: #4f46e5;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    border: 1px solid #c7d2fe;
+  }
+}

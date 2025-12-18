@@ -5,10 +5,10 @@
 
       <div class="nav-actions" *ngIf="auth.user$ | async as user; else loginBtn">
 
-        <button class="my-appts-btn" (click)="showMyAppointments = true">
+        <button class="my-appts-btn" (click)="openMyAppointmentsModal()">
           📩 Mis Solicitudes
           <span class="notif-badge-float" *ngIf="(unreadCount$ | async) as count">
-             <ng-container *ngIf="count > 0">+{{ count }}</ng-container>
+             <ng-container *ngIf="count > 0 && !notificationsRead">+{{ count }}</ng-container>
           </span>
         </button>
 
@@ -43,6 +43,19 @@
         <div class="card-body">
           <h3>{{ dev.displayName }}</h3>
           <p class="desc">{{ dev.description || 'Programador listo para ayudarte en tus proyectos.' }}</p>
+
+          <div class="availability-info">
+            <strong>🕒 Horarios Disponibles:</strong>
+            <div class="tags-container">
+               <span class="time-tag" *ngFor="let slot of dev.availability">
+                 {{ slot }}
+               </span>
+               <span *ngIf="!dev.availability?.length" style="color:#888; font-size: 0.8rem;">
+                 Sin horarios registrados
+               </span>
+            </div>
+          </div>
+          
         </div>
         <div class="card-footer">
           <button *ngIf="auth.user$ | async" class="btn-primary" (click)="openSchedule(dev)">
@@ -123,5 +136,4 @@
       </div>
     </div>
   </div>
-
 </div>

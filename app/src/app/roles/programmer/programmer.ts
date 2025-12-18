@@ -11,10 +11,10 @@ export interface Project {
   name: string;
   description: string;
   section: 'Academico' | 'Laboral';
-  participation: string;            
-  technologies: string;             
-  repoUrl: string;                  
-  demoUrl: string;                 
+  participation: string;
+  technologies: string;
+  repoUrl: string;
+  demoUrl: string;
 }
 
 export interface Appointment {
@@ -43,13 +43,21 @@ export class ProgrammerComponent {
 
   projects$: Observable<Project[]> | null = null;
   appointments$: Observable<Appointment[]> | null = null;
-  pendingCount$: Observable<number> | null = null; 
+  pendingCount$: Observable<number> | null = null;
 
   currentView: 'projects' | 'appointments' = 'projects';
 
+
+  editingProjectId: string | null = null;
+
   newProject: Partial<Project> = {
     section: 'Academico',
-    participation: 'Full Stack'
+    participation: 'Full Stack',
+    name: '',
+    description: '',
+    technologies: '',
+    repoUrl: '',
+    demoUrl: ''
   };
 
   constructor() {
@@ -74,17 +82,75 @@ export class ProgrammerComponent {
     this.currentView = view;
   }
 
+
+  startEditing(project: Project) {
+    this.editingProjectId = project.id!;
+
+    this.newProject = {
+      name: project.name,
+      description: project.description,
+      section: project.section,
+      participation: project.participation,
+      technologies: project.technologies,
+      repoUrl: project.repoUrl,
+      demoUrl: project.demoUrl
+    };
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+
+  cancelEdit() {
+    this.editingProjectId = null;
+    this.resetForm();
+  }
+
+ 
   async saveProject(userUid: string) {
+
     if (!this.newProject.name) return alert('Falta el nombre del proyecto');
+    
+
+    if (!this.newProject.repoUrl) return alert('⚠️ El enlace al repositorio de GitHub es OBLIGATORIO.');
+
     try {
-      await addDoc(collection(this.db, 'projects'), {
-        ...this.newProject,
-        ownerUid: userUid,
-        createdAt: Date.now()
-      });
-      this.newProject = { section: 'Academico', participation: 'Full Stack', name: '', description: '', technologies: '', repoUrl: '', demoUrl: '' };
-      alert('Proyecto agregado al portafolio');
-    } catch (e) { console.error(e); }
+      if (this.editingProjectId) {
+   
+        const projectRef = doc(this.db, 'projects', this.editingProjectId);
+        await updateDoc(projectRef, {
+          ...this.newProject,
+     
+        });
+        alert('✅ Proyecto actualizado correctamente');
+      } else {
+
+        await addDoc(collection(this.db, 'projects'), {
+          ...this.newProject,
+          ownerUid: userUid,
+          createdAt: Date.now()
+        });
+        alert('✅ Proyecto agregado al portafolio');
+      }
+
+ 
+      this.cancelEdit();
+
+    } catch (e) {
+      console.error(e);
+      alert('Error al guardar el proyecto');
+    }
+  }
+
+  resetForm() {
+    this.newProject = { 
+      section: 'Academico', 
+      participation: 'Full Stack', 
+      name: '', 
+      description: '', 
+      technologies: '', 
+      repoUrl: '', 
+      demoUrl: '' 
+    };
   }
 
   async deleteProject(id: string) {

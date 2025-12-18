@@ -46,7 +46,7 @@ export class AuthService {
     switch (role) {
       case 'admin': return '/admin';
       case 'programmer': return '/programmer';
-      default: return '/public'; // o '/home'
+      default: return '/public'; 
     }
   }
 

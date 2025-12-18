@@ -20,7 +20,7 @@ export class AdminComponent {
 
   selectedUser: Partial<AppUser> | null = null;
   isModalOpen = false;
-  isNewUser = false; 
+  isNewUser = false;
 
   newScheduleInput: string = '';
 
@@ -32,7 +32,9 @@ export class AdminComponent {
       email: '',
       specialty: '',
       description: '',
-      availability: [] 
+      availability: [],
+      whatsapp: '', 
+      github: ''    
     };
     this.newScheduleInput = '';
     this.isModalOpen = true;
@@ -42,7 +44,7 @@ export class AdminComponent {
     this.isNewUser = false;
     this.selectedUser = {
       ...user,
-      availability: user.availability || [] 
+      availability: user.availability || []
     };
     this.newScheduleInput = '';
     this.isModalOpen = true;
@@ -53,12 +55,26 @@ export class AdminComponent {
     this.selectedUser = null;
   }
 
+
   addSchedule() {
-    if (!this.newScheduleInput.trim()) return;
+    const rawInput = this.newScheduleInput.trim();
+    if (!rawInput) return;
+
     if (!this.selectedUser!.availability) {
       this.selectedUser!.availability = [];
     }
-    this.selectedUser!.availability!.push(this.newScheduleInput.trim());
+
+
+    const exists = this.selectedUser!.availability.some(
+      slot => slot.toLowerCase() === rawInput.toLowerCase()
+    );
+
+    if (exists) {
+      alert('⚠️ Este horario ya ha sido registrado para este usuario.');
+      return; 
+    }
+
+    this.selectedUser!.availability!.push(rawInput);
     this.newScheduleInput = '';
   }
 
@@ -66,8 +82,26 @@ export class AdminComponent {
     this.selectedUser!.availability!.splice(index, 1);
   }
 
+  validateWhatsappInput(event: any) {
+    const input = event.target as HTMLInputElement;
+
+    const cleanValue = input.value.replace(/[^0-9+]/g, '');
+    
+
+    input.value = cleanValue;
+    this.selectedUser!.whatsapp = cleanValue;
+  }
+
   async saveUserChanges() {
     if (!this.selectedUser) return;
+
+
+    if (this.selectedUser.role === 'programmer') {
+      if (!this.selectedUser.github || this.selectedUser.github.trim() === '') {
+        alert(' El enlace de GitHub es OBLIGATORIO para registrar a un programador.');
+        return; 
+      }
+    }
 
     try {
       if (this.isNewUser) {
@@ -90,7 +124,7 @@ export class AdminComponent {
           whatsapp: this.selectedUser.whatsapp || '',
           linkedin: this.selectedUser.linkedin || '',
           github: this.selectedUser.github || '',
-          availability: this.selectedUser.availability || [] 
+          availability: this.selectedUser.availability || []
         });
         alert('Datos actualizados correctamente.');
       }
@@ -107,7 +141,7 @@ export class AdminComponent {
   }
 
   async deleteUser(user: AppUser) {
-    if(confirm(`¿Estás seguro de eliminar a ${user.displayName}?`)) {
+    if (confirm(`¿Estás seguro de eliminar a ${user.displayName}?`)) {
       await deleteDoc(doc(this.db, 'users', user.uid));
     }
   }
